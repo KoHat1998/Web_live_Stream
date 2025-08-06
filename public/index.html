@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Live Broadcast</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="header">
+    <span class="logo">▶️</span> LiveStreamTube
+  </div>
+  <div class="main-content">
+    <div class="video-container">
+      <video id="video" autoplay muted controls></video>
+      <div class="controls">
+        <button id="go-live">Go Live</button>
+        <button id="stop-live" disabled>Stop Live</button>
+      </div>
+      <p id="status"></p>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
