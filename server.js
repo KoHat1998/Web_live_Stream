@@ -12,13 +12,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post("/consumer", async ({ body }, res) => {
     const peer = new webrtc.RTCPeerConnection({
         iceServers: [
-            { urls: "stun:stunprotocol.org" },
-            {
-                urls: "turn:openrelay.metered.ca:80",
-                username: "openrelayproject",
-                credential: "openrelayproject"
-            }
-        ]
+    { urls: "stun:stunprotocol.org" },
+    {
+        urls: "turn:openrelay.metered.ca:80",
+        username: "openrelayproject",
+        credential: "openrelayproject"
+    },
+    {
+        urls: "turn:global.relay.metered.ca:80",
+        username: "openrelayproject",
+        credential: "openrelayproject"
+    }
+]
+
     });
     const desc = new webrtc.RTCSessionDescription(body.sdp);
     await peer.setRemoteDescription(desc);
@@ -31,15 +37,21 @@ app.post("/consumer", async ({ body }, res) => {
 
 app.post('/broadcast', async ({ body }, res) => {
     const peer = new webrtc.RTCPeerConnection({
-        iceServers: [
-            { urls: "stun:stunprotocol.org" },
-            {
-                urls: "turn:openrelay.metered.ca:80",
-                username: "openrelayproject",
-                credential: "openrelayproject"
-            }
-        ]
-    });
+    iceServers: [
+        { urls: "stun:stunprotocol.org" },
+        {
+            urls: "turn:openrelay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        },
+        {
+            urls: "turn:global.relay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        }
+    ]
+});
+
     peer.ontrack = (e) => handleTrackEvent(e, peer);
     const desc = new webrtc.RTCSessionDescription(body.sdp);
     await peer.setRemoteDescription(desc);

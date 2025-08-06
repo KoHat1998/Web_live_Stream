@@ -25,15 +25,21 @@ function stopWatch() {
 
 function createPeer() {
     const peerConnection = new RTCPeerConnection({
-        iceServers: [
-            { urls: "stun:stunprotocol.org" },
-            {
-                urls: "turn:openrelay.metered.ca:80",
-                username: "openrelayproject",
-                credential: "openrelayproject"
-            }
-        ]
-    });
+    iceServers: [
+        { urls: "stun:stunprotocol.org" },
+        {
+            urls: "turn:openrelay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        },
+        {
+            urls: "turn:global.relay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        }
+    ]
+});
+
     peerConnection.addTransceiver("video", { direction: "recvonly" });
     peerConnection.addTransceiver("audio", { direction: "recvonly" });
     peerConnection.ontrack = handleTrackEvent;
