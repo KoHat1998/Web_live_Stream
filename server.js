@@ -72,6 +72,7 @@ function handleTrackEvent(e, peer) {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
+    console.log('If you want to test on localhost, open this on browser:');
     console.log('server started on port ' + PORT)
     console.log(`for broadcaster: http://localhost:${PORT}`);
     console.log(`for viewer: http://localhost:${PORT}/viewer.html`);
