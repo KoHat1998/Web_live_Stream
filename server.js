@@ -10,36 +10,52 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const iceServers = [
-  {urls: [ "stun:ss-turn1.xirsys.com" ]
-}, {
-   username: "i4ZrjB737SBvzAuBytor5ByRL1wlwInKspSxUsvccOtE3Xzb4cu_ELZK73SuOeV2AAAAAGiUD_9Lb0hhdA==",
-   credential: "9ec69d0c-7336-11f0-99a0-0242ac140004",
-   urls: [
-       "turn:ss-turn1.xirsys.com:80?transport=udp",
-       "turn:ss-turn1.xirsys.com:3478?transport=udp",
-       "turn:ss-turn1.xirsys.com:80?transport=tcp",
-       "turn:ss-turn1.xirsys.com:3478?transport=tcp",
-       "turns:ss-turn1.xirsys.com:443?transport=tcp",
-       "turns:ss-turn1.xirsys.com:5349?transport=tcp"
-   ]}
+  { urls: [ "stun:ss-turn1.xirsys.com" ] },
+  {
+    username: "i4ZrjB737SBvzAuBytor5ByRL1wlwInKspSxUsvccOtE3Xzb4cu_ELZK73SuOeV2AAAAAGiUD_9Lb0hhdA==",
+    credential: "9ec69d0c-7336-11f0-99a0-0242ac140004",
+    urls: [
+      "turn:ss-turn1.xirsys.com:80?transport=udp",
+      "turn:ss-turn1.xirsys.com:3478?transport=udp",
+      "turn:ss-turn1.xirsys.com:80?transport=tcp",
+      "turn:ss-turn1.xirsys.com:3478?transport=tcp",
+      "turns:ss-turn1.xirsys.com:443?transport=tcp",
+      "turns:ss-turn1.xirsys.com:5349?transport=tcp"
+    ]
+  }
 ];
 
+// CONSUMER (Viewer)
 app.post("/consumer", async ({ body }, res) => {
     const peer = new webrtc.RTCPeerConnection({ iceServers });
+
+    if (senderStream) {
+        console.log('Adding tracks to viewer peer:', senderStream.getTracks().length);
+        senderStream.getTracks().forEach(track => {
+            console.log('Adding track kind:', track.kind);
+            peer.addTrack(track, senderStream);
+        });
+    } else {
+        console.log('No senderStream available when viewer connects.');
+    }
+
     const desc = new webrtc.RTCSessionDescription(body.sdp);
     await peer.setRemoteDescription(desc);
-    senderStream && senderStream.getTracks().forEach(track => peer.addTrack(track, senderStream));
+
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
     const payload = { sdp: peer.localDescription }
     res.json(payload);
 });
 
+// BROADCAST (Broadcaster)
 app.post('/broadcast', async ({ body }, res) => {
     const peer = new webrtc.RTCPeerConnection({ iceServers });
     peer.ontrack = (e) => handleTrackEvent(e, peer);
+
     const desc = new webrtc.RTCSessionDescription(body.sdp);
     await peer.setRemoteDescription(desc);
+
     const answer = await peer.createAnswer();
     await peer.setLocalDescription(answer);
     const payload = { sdp: peer.localDescription }
@@ -48,6 +64,10 @@ app.post('/broadcast', async ({ body }, res) => {
 
 function handleTrackEvent(e, peer) {
     senderStream = e.streams[0];
+    console.log('Received track event. Stream tracks:', senderStream.getTracks().length);
+    senderStream.getTracks().forEach(track => {
+        console.log('Track kind:', track.kind, 'enabled:', track.enabled, 'readyState:', track.readyState);
+    });
 };
 
 const PORT = process.env.PORT || 5000;
